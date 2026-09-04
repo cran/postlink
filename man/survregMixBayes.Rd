@@ -2,7 +2,7 @@
 % Please edit documentation in R/mixbayes_survreg.R
 \name{survregMixBayes}
 \alias{survregMixBayes}
-\title{Bayesian two-component mixture survival regression model}
+\title{Bayesian Two-Component Mixture Survival Regression Model}
 \usage{
 survregMixBayes(
   X,
@@ -33,7 +33,12 @@ Since the Stan models are pre-compiled, prior specifications are converted
 into the corresponding numeric hyperparameters and passed to the model as
 data. Any missing entries are automatically filled in using symmetric
 default values via
-\code{fill_defaults(priors, p_family = dist, model_type = "survival")}.}
+\code{fill_defaults(priors, p_family = dist, model_type = "survival")}.
+
+Intercept and slope priors are decoupled. Use \code{intercept1}/\code{intercept2}
+for the intercept of each component and \code{beta1}/\code{beta2} for the slope
+coefficients. By default, intercept priors are \code{normal(0, 10)} (weakly
+informative), while slope priors follow the distribution-specific defaults.}
 
 \item{control}{A named \code{list} of control parameters for posterior
 sampling. Defaults are:

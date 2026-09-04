@@ -2,7 +2,7 @@
 # Internal helpers for Bayesian survival mixture worker.
 # Keep these helpers in a file that is collated/sourced before mixture_bayessurvreg.R.
 
-#' Validate survreg dist string
+#' Validate survreg Dist String
 #' @noRd
 .validate_survreg_dist <- function(dist) {
  if (missing(dist) || !is.character(dist) || length(dist) != 1L) {
@@ -11,7 +11,7 @@
  tolower(dist)
 }
 
-#' Normalize survreg response to (time, event)
+#' Normalize survreg Response to (Time, Event)
 #' @noRd
 .normalize_surv_y <- function(y) {
  if (is.list(y) && all(c("time", "event") %in% names(y))) {
@@ -29,7 +29,7 @@
  list(time = time, event = event)
 }
 
-#' Generate Stan code for a two-component survival mixture
+#' Generate Stan Code for a Two-Component Survival Mixture
 #'
 #' Creates a complete Stan program as a single string for a two-component mixture survival model
 #' with both components of the same family (Gamma or Weibull). The Stan code includes
@@ -83,9 +83,13 @@ generate_stan_surv <- function(components, priors = list()) {
    "  eta2 = X * beta2;",
    "}",
    "model {",
-   "  // priors",
-   "  beta1 ~ ", priors$beta1, ";",
-   "  beta2 ~ ", priors$beta2, ";",
+   "  // priors: separate intercept and slope priors",
+   "  beta1[1] ~ ", priors$intercept1, ";",
+   "  beta2[1] ~ ", priors$intercept2, ";",
+   "  if (K > 1) {",
+   "    beta1[2:K] ~ ", priors$beta1, ";",
+   "    beta2[2:K] ~ ", priors$beta2, ";",
+   "  }",
    "  theta ~ ", priors$theta, ";",
    "  phi1 ~ ", priors$phi1, ";",
    "  phi2 ~ ", priors$phi2, ";",
@@ -156,8 +160,13 @@ generate_stan_surv <- function(components, priors = list()) {
    "  eta2 = X * beta2;",
    "}",
    "model {",
-   "  beta1 ~ ", priors$beta1, ";",
-   "  beta2 ~ ", priors$beta2, ";",
+   "  // priors: separate intercept and slope priors",
+   "  beta1[1] ~ ", priors$intercept1, ";",
+   "  beta2[1] ~ ", priors$intercept2, ";",
+   "  if (K > 1) {",
+   "    beta1[2:K] ~ ", priors$beta1, ";",
+   "    beta2[2:K] ~ ", priors$beta2, ";",
+   "  }",
    "  theta ~ ", priors$theta, ";",
    "  shape1 ~ ", priors$shape1, ";",
    "  shape2 ~ ", priors$shape2, ";",

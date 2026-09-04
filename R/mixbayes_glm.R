@@ -1,4 +1,4 @@
-#' Bayesian two-component mixture generalized linear model
+#' Bayesian Two-Component Mixture Generalized Linear Model
 #'
 #' Fits a Bayesian two-component mixture generalized linear model (GLM)
 #' using Stan. Each observation is assumed to arise from one of two latent
@@ -20,6 +20,11 @@
 #'   hyperparameters and passed to the model's data block. Any missing entries are
 #'   automatically filled with symmetric defaults via
 #'   \code{fill_defaults(priors, p_family = family, model_type = "glm")}.
+#'
+#'   Intercept and slope priors are decoupled. Use \code{intercept1}/\code{intercept2}
+#'   for the intercept of each component and \code{beta1}/\code{beta2} for the slope
+#'   coefficients. By default, intercept priors are \code{normal(0, 10)} (weakly
+#'   informative), while slope priors follow the family-specific defaults.
 #' @param control A named \code{list} of MCMC tuning parameters.
 #'   Supported elements include:
 #'   \itemize{
@@ -233,6 +238,16 @@ glmMixBayes <- function(X, y, family = "gaussian", priors = NULL,
   posterior <- swap_if_present(posterior, "sigma1", "sigma2")  # gaussian
   posterior <- swap_if_present(posterior, "phi1",   "phi2")    # gamma
  }
+
+
+ if (exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
+  old_seed <- get(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
+  on.exit(assign(".Random.seed", old_seed, envir = .GlobalEnv), add = TRUE)
+ } else {
+  on.exit(rm(list = ".Random.seed", envir = .GlobalEnv), add = TRUE)
+ }
+
+ set.seed(seed)
 
  # --- 1) Iterative ECR alignment of labels across MCMC draws -------------------
  ls_out <- label.switching::label.switching(
